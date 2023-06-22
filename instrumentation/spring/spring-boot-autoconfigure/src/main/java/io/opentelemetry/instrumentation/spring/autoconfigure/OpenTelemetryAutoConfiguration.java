@@ -31,6 +31,7 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.Collections;
 import java.util.List;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -46,7 +47,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
  *
  * <p>Updates the sampler probability for the configured {@link TracerProvider}.
  */
-@Configuration
+@AutoConfiguration
 @EnableConfigurationProperties({MetricExportProperties.class, SamplerProperties.class})
 public class OpenTelemetryAutoConfiguration {
 

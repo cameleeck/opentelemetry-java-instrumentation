@@ -19,8 +19,11 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
@@ -201,5 +204,36 @@ class OpenTelemetryAutoConfigurationTest {
                   .doesNotHaveBean("sdkTracerProvider")
                   .doesNotHaveBean("sdkMeterProvider");
             });
+  }
+
+  @AutoConfiguration
+  @AutoConfigureBefore(OpenTelemetryAutoConfiguration.class)
+  static class CustomSdkTracerAutoConfiguration {
+    @Bean
+    public SdkTracerProvider customSdkTracerProvider() {
+      return SdkTracerProvider.builder().build();
+    }
+  }
+
+  @Nested
+  class AutoConfigurationTests {
+
+    @Test
+    @DisplayName(
+        "when Application Context contains auto-configured customSdkTracerProvider bean should NOT initialize default one")
+    void customSdkTelemetryAutoconfiguration() {
+      contextRunner
+          .withConfiguration(
+              AutoConfigurations.of(
+                  CustomSdkTracerAutoConfiguration.class, OpenTelemetryAutoConfiguration.class))
+          .run(
+              context ->
+                  assertThat(context)
+                      .hasBean("customSdkTracerProvider")
+                      .hasBean("openTelemetry")
+                      .doesNotHaveBean("sdkTracerProvider")
+                      .hasBean("sdkMeterProvider")
+                      .hasBean("sdkLoggerProvider"));
+    }
   }
 }
